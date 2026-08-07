@@ -3,6 +3,7 @@ import fs from "fs";
 import { extractText } from "../services/orcService.js";
 import { processBill } from "../services/aiService.js";
 import Bill from "../models/Invoice.js";
+import { setFlagsFromString } from "v8";
 
 export const uploadBill = async (req, res) => {
   try {
@@ -39,3 +40,81 @@ export const uploadBill = async (req, res) => {
   }
 };
 
+export const getBills = async (req, res) => {
+  try {
+    const bills = await Bill.find().sort({ createdAt: -1 });
+    res.status(200).json({
+      success: true,
+      bills,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const getBillById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const bill = await Bill.findById(id);
+    if (!bill) {
+      return res.status(404).json({
+        success: false,
+        message: "Bill not found",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      bill,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const deleteBill = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const bill = await Bill.findById(id);
+    if (!bill) {
+      return res.status(404).json({
+        success: false,
+        message: "Bill not found",
+      });
+    }
+
+    await bill.deleteOne();
+    res.status(200).json({
+      success: true,
+      message: "Bill Deleted successfully",
+    });
+  } catch (error) {}
+};
+
+export const updateBill = async (req, res) => {
+  try {
+    const { id } = req.params;
+   const bill = await Bill.findById(id)
+    if(!bill){
+      return res.status(404).json({
+        success: false,
+        message: "Bill not found"
+      })
+    }
+
+    Object.assign(Bill, req.body)
+
+    await bill.save()
+
+    res.status(200).json({
+      success: true,
+      message: "Bill updated successfully",
+      bill
+    })
+  } catch (error) {}
+};
