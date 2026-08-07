@@ -1,0 +1,81 @@
+import mongoose from "mongoose";
+
+const billSchema = new mongoose.Schema(
+  {
+    companyName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    customerName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    customerEmail: {
+      type: String,
+      required: true,
+      lowercase: true,
+      trim: true,
+    },
+
+    customerPhone: {
+      type: String,
+      trim: true,
+    },
+
+    invoiceNumber: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
+
+    invoiceDate: {
+      type: Date,
+      required: true,
+      default: Date.now,
+    },
+
+    dueDate: {
+      type: Date,
+    },
+
+    amount: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+
+    gst: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+
+    category: {
+      type: String,
+      trim: true,
+    },
+
+    status: {
+      type: String,
+      enum: ["Pending", "Paid", "Overdue", "Cancelled"],
+      default: "Pending",
+    },
+
+    image: {
+      type: String,
+      trim: true,
+    },
+  },
+  {
+    timestamps: true,
+  },
+);
+
+const Bill = mongoose.model("Bill", billSchema);
+
+export default Bill;
