@@ -1,14 +1,6 @@
 import React from 'react';
 import { Filter, FileText, Eye, Download, ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
 
-const bills = [
-  { id: 'INV-2024-00567', vendor: 'TechMart Solutions', customer: 'Rahul Sharma', amount: '₹70,300.02', date: '04 Jun 2024', status: 'Pending' },
-  { id: 'INV-2024-00566', vendor: 'Office Gear India', customer: 'Priya Verma', amount: '₹23,450.00', date: '01 Jun 2024', status: 'Paid' },
-  { id: 'INV-2024-00565', vendor: 'Global Supplies', customer: 'Amit Patel', amount: '₹15,780.50', date: '28 May 2024', status: 'Overdue' },
-  { id: 'INV-2024-00564', vendor: 'TechMart Solutions', customer: 'Neha Gupta', amount: '₹45,120.75', date: '10 Jun 2024', status: 'Pending' },
-  { id: 'INV-2024-00563', vendor: 'Stationery Hub', customer: 'Vikram Singh', amount: '₹8,920.00', date: '15 Jun 2024', status: 'Paid' },
-];
-
 const StatusBadge = ({ status }) => {
   const getStatusClass = () => {
     if (status === 'Paid') return 'bg-success-light text-success';
@@ -36,7 +28,11 @@ const getVendorColor = (index) => {
   return 'bg-[#FFF8E1]';
 };
 
-const RecentBills = () => {
+const RecentBills = ({ bills = [], loading }) => {
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount || 0);
+  };
+
   return (
     <div className="bg-white rounded-2xl p-6 border border-border shadow-[0_2px_4px_rgba(28,28,40,0.04)]">
       <div className="flex justify-between items-center mb-6">
@@ -57,6 +53,11 @@ const RecentBills = () => {
       </div>
 
       <div className="overflow-x-auto mb-4">
+        {loading ? (
+          <div className="py-8 text-center text-text-muted">Loading bills...</div>
+        ) : bills.length === 0 ? (
+          <div className="py-8 text-center text-text-muted">No recent bills found.</div>
+        ) : (
         <table className="w-full text-left border-collapse">
           <thead>
             <tr>
@@ -71,28 +72,28 @@ const RecentBills = () => {
           </thead>
           <tbody>
             {bills.map((bill, index) => (
-              <tr key={index} className="hover:bg-bg transition-colors">
-                <td className="py-4 px-4 text-[13px] border-b border-border text-primary font-medium">{bill.id}</td>
+              <tr key={bill._id || index} className="hover:bg-bg transition-colors">
+                <td className="py-4 px-4 text-[13px] border-b border-border text-primary font-medium">{bill.invoiceNumber || 'N/A'}</td>
                 <td className="py-4 px-4 text-[13px] border-b border-border text-text-main">
                   <div className="flex items-center gap-3">
                     <div className={`w-7 h-7 rounded-md ${getVendorColor(index)}`}></div>
-                    {bill.vendor}
+                    {bill.companyName || 'N/A'}
                   </div>
                 </td>
                 <td className="py-4 px-4 text-[13px] border-b border-border text-text-main">
                   <div className="flex items-center gap-3">
                     <div className="w-6 h-6 rounded-full bg-border flex items-center justify-center text-[10px] text-text-muted">👤</div>
-                    {bill.customer}
+                    {bill.customerName || 'N/A'}
                   </div>
                 </td>
-                <td className="py-4 px-4 text-[13px] border-b border-border text-text-main font-medium">{bill.amount}</td>
+                <td className="py-4 px-4 text-[13px] border-b border-border text-text-main font-medium">{formatCurrency(bill.amount)}</td>
                 <td className="py-4 px-4 text-[13px] border-b border-border text-text-main">
                   <div className="flex items-center gap-1.5 text-text-muted">
                     <span className="text-xs opacity-70">📅</span>
-                    {bill.date}
+                    {bill.dueDate ? new Date(bill.dueDate).toLocaleDateString() : (bill.invoiceDate ? new Date(bill.invoiceDate).toLocaleDateString() : 'N/A')}
                   </div>
                 </td>
-                <td className="py-4 px-4 border-b border-border"><StatusBadge status={bill.status} /></td>
+                <td className="py-4 px-4 border-b border-border"><StatusBadge status={bill.status || 'Pending'} /></td>
                 <td className="py-4 px-4 border-b border-border">
                   <div className="flex items-center gap-2">
                     <button className="w-8 h-8 rounded-lg border border-border flex items-center justify-center text-text-muted transition-colors hover:bg-bg hover:text-text-main"><Eye size={16} /></button>
@@ -103,22 +104,22 @@ const RecentBills = () => {
             ))}
           </tbody>
         </table>
+        )}
       </div>
 
-      <div className="flex justify-between items-center pt-2">
-        <span className="text-xs text-text-muted">Showing 1 to 5 of 24 bills</span>
-        <div className="flex items-center gap-1">
-          <button className="min-w-8 h-8 rounded-lg flex items-center justify-center text-[13px] text-text-main transition-colors hover:bg-bg"><ChevronLeft size={16}/></button>
-          <button className="min-w-8 h-8 rounded-lg flex items-center justify-center text-[13px] text-white bg-primary">1</button>
-          <button className="min-w-8 h-8 rounded-lg flex items-center justify-center text-[13px] text-text-main transition-colors hover:bg-bg">2</button>
-          <button className="min-w-8 h-8 rounded-lg flex items-center justify-center text-[13px] text-text-main transition-colors hover:bg-bg">3</button>
-          <span className="flex items-center justify-center w-8 h-8 text-text-muted"><MoreHorizontal size={16}/></span>
-          <button className="min-w-8 h-8 rounded-lg flex items-center justify-center text-[13px] text-text-main transition-colors hover:bg-bg">5</button>
-          <button className="min-w-8 h-8 rounded-lg flex items-center justify-center text-[13px] text-text-main transition-colors hover:bg-bg"><ChevronRight size={16}/></button>
+      {!loading && bills.length > 0 && (
+        <div className="flex justify-between items-center pt-2">
+          <span className="text-xs text-text-muted">Showing 1 to {Math.min(bills.length, 5)} of {bills.length} bills</span>
+          <div className="flex items-center gap-1">
+            <button className="min-w-8 h-8 rounded-lg flex items-center justify-center text-[13px] text-text-main transition-colors hover:bg-bg"><ChevronLeft size={16}/></button>
+            <button className="min-w-8 h-8 rounded-lg flex items-center justify-center text-[13px] text-white bg-primary">1</button>
+            <button className="min-w-8 h-8 rounded-lg flex items-center justify-center text-[13px] text-text-main transition-colors hover:bg-bg"><ChevronRight size={16}/></button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
+
 
 export default RecentBills;

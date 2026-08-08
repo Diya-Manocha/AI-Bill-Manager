@@ -25,12 +25,21 @@ const Card = ({ title, value, change, isPositive, icon: Icon, iconBgClass, iconC
   </div>
 );
 
-const SummaryCards = () => {
+const SummaryCards = ({ bills = [] }) => {
+  const totalBills = bills.length;
+  const pendingAmount = bills.filter(b => b.status === 'Pending').reduce((acc, b) => acc + (b.amount || 0), 0);
+  const paidAmount = bills.filter(b => b.status === 'Paid').reduce((acc, b) => acc + (b.amount || 0), 0);
+  const overdueAmount = bills.filter(b => b.status === 'Overdue').reduce((acc, b) => acc + (b.amount || 0), 0);
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount);
+  };
+
   return (
     <div className="grid grid-cols-4 gap-6">
       <Card 
         title="Total Bills" 
-        value="24" 
+        value={totalBills.toString()} 
         change="12" 
         isPositive={true} 
         icon={FileText} 
@@ -40,7 +49,7 @@ const SummaryCards = () => {
       />
       <Card 
         title="Pending Amount" 
-        value="₹1,45,230" 
+        value={formatCurrency(pendingAmount)} 
         change="8" 
         isPositive={false} 
         icon={Clock} 
@@ -50,7 +59,7 @@ const SummaryCards = () => {
       />
       <Card 
         title="Paid Amount" 
-        value="₹3,62,580" 
+        value={formatCurrency(paidAmount)} 
         change="18" 
         isPositive={true} 
         icon={CheckCircle2} 
@@ -60,7 +69,7 @@ const SummaryCards = () => {
       />
       <Card 
         title="Overdue Amount" 
-        value="₹18,450" 
+        value={formatCurrency(overdueAmount)} 
         change="5" 
         isPositive={false} 
         icon={AlertTriangle} 

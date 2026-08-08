@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { UploadCloud, Sparkles } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { uploadBill } from '../apis/billApi';
 
 const data = [
   { name: '1 May', paid: 15, pending: 10, overdue: 5 },
@@ -10,7 +11,41 @@ const data = [
   { name: '29 May', paid: 90, pending: 35, overdue: 12 },
 ];
 
-const MiddleSection = () => {
+const MiddleSection = ({ bills }) => {
+  const fileInputRef = useRef(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== 'application/pdf') {
+      alert('Only PDF files are allowed');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('bill', file);
+
+    try {
+      setUploading(true);
+      await uploadBill(formData);
+      alert('Invoice uploaded successfully! Please refresh to see the updated bills.');
+    } catch (error) {
+      console.error('Upload failed:', error);
+      alert('Failed to upload invoice');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
   return (
     <div className="flex gap-6">
       <div className="flex-none w-[350px] bg-white rounded-2xl p-6 border border-border shadow-[0_2px_4px_rgba(28,28,40,0.04)]">
@@ -22,12 +57,27 @@ const MiddleSection = () => {
           <p className="text-[13px] text-text-muted leading-relaxed">Upload your invoice and let AI extract the details automatically.</p>
         </div>
         
-        <div className="border-2 border-dashed border-primary-light rounded-xl py-8 px-6 flex flex-col items-center justify-center text-center bg-[#F8F7FF] mb-4 transition-all cursor-pointer hover:border-primary hover:bg-primary-light">
+        <input 
+          type="file" 
+          ref={fileInputRef} 
+          style={{ display: 'none' }} 
+          accept="application/pdf"
+          onChange={handleFileChange}
+        />
+        
+        <div 
+          onClick={handleUploadClick}
+          className={`border-2 border-dashed border-primary-light rounded-xl py-8 px-6 flex flex-col items-center justify-center text-center bg-[#F8F7FF] mb-4 transition-all cursor-pointer hover:border-primary hover:bg-primary-light ${uploading ? 'opacity-50 pointer-events-none' : ''}`}
+        >
           <UploadCloud size={32} color="#6B4EFF" className="mb-3" />
-          <p className="text-sm text-text-main mb-4 leading-relaxed">Drag & drop your invoice here<br/>or</p>
-          <button className="bg-primary text-white py-2.5 px-6 rounded-lg font-medium text-sm transition-colors hover:bg-[#5538EE]">Choose File</button>
+          <p className="text-sm text-text-main mb-4 leading-relaxed">
+            {uploading ? 'Uploading...' : <><>Drag & drop your invoice here</><br/>or</>}
+          </p>
+          <button type="button" className="bg-primary text-white py-2.5 px-6 rounded-lg font-medium text-sm transition-colors hover:bg-[#5538EE]" disabled={uploading}>
+            {uploading ? 'Processing...' : 'Choose File'}
+          </button>
         </div>
-        <p className="text-center text-xs text-text-light">Supports: PNG, JPG, PDF (Max 10MB)</p>
+        <p className="text-center text-xs text-text-light">Supports: PDF (Max 10MB)</p>
       </div>
 
       <div className="flex-1 bg-white rounded-2xl p-6 border border-border shadow-[0_2px_4px_rgba(28,28,40,0.04)] flex flex-col">

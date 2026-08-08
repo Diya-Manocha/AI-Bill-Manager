@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import User from "../models/User";
+import User from "../models/User.js";
 import jwt from "jsonwebtoken";
 
 export const registerUser = async (req, res) => {
@@ -52,9 +52,9 @@ export const loginUser = async (req, res) => {
       });
     }
 
-    const user = await user.findOne({ email });
+    const user = await User.findOne({ email });
     if (!user) {
-      res.status(401).json({
+      return res.status(401).json({
         message: "Invalid email or password",
       });
     }
@@ -62,7 +62,7 @@ export const loginUser = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      res.status(401).json({
+      return res.status(401).json({
         message: "Invalid email or password",
       });
     }
@@ -85,5 +85,11 @@ export const loginUser = async (req, res) => {
         email: user.email,
       },
     });
-  } catch (error) {}
+  } catch (error) {
+    console.error("Login error:", error);
+    return res.status(500).json({
+      message: "Internal server error",
+      error: error.message
+    });
+  }
 };
