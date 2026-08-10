@@ -17,6 +17,7 @@ export const uploadBill = async (req, res) => {
 
     const bill = new Bill({
       ...billData,
+      user: req.user.id,
       // image: result.secure_url,
       image: req.file.path,
     });

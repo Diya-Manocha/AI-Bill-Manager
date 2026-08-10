@@ -25,7 +25,8 @@ export default function Register() {
       console.log("Register response:", response);
 
       if (response.success) {
-        navigate("/login");
+        localStorage.setItem("token", response.data.token);
+        navigate("/");
       }
     } catch (error) {
       console.log("Registration failed:", error);

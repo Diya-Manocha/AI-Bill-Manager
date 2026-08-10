@@ -18,7 +18,7 @@ export default function Login() {
         password,
       });
       if (response.success) {
-        localStorage.setItem("token", response.token);
+        localStorage.setItem("token", response.data.token);
         navigate("/");
       }
     } catch (error) {
