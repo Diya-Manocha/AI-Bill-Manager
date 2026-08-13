@@ -25,21 +25,25 @@ const Card = ({ title, value, change, isPositive, icon: Icon, iconBgClass, iconC
   </div>
 );
 
-const SummaryCards = ({ bills = [] }) => {
-  const totalBills = bills.length;
-  const pendingAmount = bills.filter(b => b.status === 'Pending').reduce((acc, b) => acc + (b.amount || 0), 0);
-  const paidAmount = bills.filter(b => b.status === 'Paid').reduce((acc, b) => acc + (b.amount || 0), 0);
-  const overdueAmount = bills.filter(b => b.status === 'Overdue').reduce((acc, b) => acc + (b.amount || 0), 0);
+const SummaryCards = ({ stats = [] }) => {
+  console.log("statssssssssss", stats)
+  // const totalBills = bills.length;
+  // const pendingAmount = bills.filter(b => b.status === 'Pending').reduce((acc, b) => acc + (b.amount || 0), 0);
+  // const paidAmount = bills.filter(b => b.status === 'Paid').reduce((acc, b) => acc + (b.amount || 0), 0);
+  // const overdueAmount = bills.filter(b => b.status === 'Overdue').reduce((acc, b) => acc + (b.amount || 0), 0);
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount);
-  };
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+  }).format(Number(amount) || 0);
+};
 
   return (
     <div className="grid grid-cols-4 gap-6">
       <Card 
         title="Total Bills" 
-        value={totalBills.toString()} 
+        value={stats.totalBills} 
         change="12" 
         isPositive={true} 
         icon={FileText} 
@@ -49,7 +53,7 @@ const SummaryCards = ({ bills = [] }) => {
       />
       <Card 
         title="Pending Amount" 
-        value={formatCurrency(pendingAmount)} 
+        value={formatCurrency(stats.pendingAmount)} 
         change="8" 
         isPositive={false} 
         icon={Clock} 
@@ -59,7 +63,7 @@ const SummaryCards = ({ bills = [] }) => {
       />
       <Card 
         title="Paid Amount" 
-        value={formatCurrency(paidAmount)} 
+        value={formatCurrency(stats.paidAmount)} 
         change="18" 
         isPositive={true} 
         icon={CheckCircle2} 
@@ -69,7 +73,7 @@ const SummaryCards = ({ bills = [] }) => {
       />
       <Card 
         title="Overdue Amount" 
-        value={formatCurrency(overdueAmount)} 
+        value={formatCurrency(stats.overdueAmount)} 
         change="5" 
         isPositive={false} 
         icon={AlertTriangle} 

@@ -19,11 +19,6 @@ const MiddleSection = ({ bills }) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.type !== 'application/pdf') {
-      alert('Only PDF files are allowed');
-      return;
-    }
-
     const formData = new FormData();
     formData.append('bill', file);
 
@@ -61,7 +56,7 @@ const MiddleSection = ({ bills }) => {
           type="file" 
           ref={fileInputRef} 
           style={{ display: 'none' }} 
-          accept="application/pdf"
+          accept=".pdf,.png,.jpg,.jpeg,.webp"
           onChange={handleFileChange}
         />
         

@@ -10,7 +10,7 @@ import {
   Sparkles
 } from 'lucide-react';
 
-const Sidebar = () => {
+const Sidebar = ({ activeTab = 'dashboard', setActiveTab = () => {} }) => {
   return (
     <aside className="w-[280px] bg-white h-screen flex flex-col py-8 px-6 border-r border-border">
       <div className="flex items-center gap-3 mb-10">
@@ -21,11 +21,17 @@ const Sidebar = () => {
       </div>
 
       <nav className="flex flex-col gap-2">
-        <div className="flex items-center gap-4 py-3 px-4 rounded-xl bg-primary-light text-primary font-semibold cursor-pointer">
+        <div 
+          onClick={() => setActiveTab('dashboard')}
+          className={`flex items-center gap-4 py-3 px-4 rounded-xl font-medium cursor-pointer transition-colors ${activeTab === 'dashboard' ? 'bg-primary-light text-primary font-semibold' : 'text-text-muted hover:bg-bg hover:text-text-main'}`}
+        >
           <LayoutDashboard size={20} />
           <span>Dashboard</span>
         </div>
-        <div className="flex items-center gap-4 py-3 px-4 rounded-xl text-text-muted font-medium hover:bg-bg hover:text-text-main cursor-pointer transition-colors">
+        <div 
+          onClick={() => setActiveTab('upload')}
+          className={`flex items-center gap-4 py-3 px-4 rounded-xl font-medium cursor-pointer transition-colors ${activeTab === 'upload' ? 'bg-primary-light text-primary font-semibold' : 'text-text-muted hover:bg-bg hover:text-text-main'}`}
+        >
           <UploadCloud size={20} />
           <span>Upload Invoice</span>
         </div>
