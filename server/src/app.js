@@ -3,7 +3,8 @@ import cors from "cors";
 import billRoutes from "./routes/billRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import emailRoutes from "./routes/emailRoute.js";
-import dashboardRoutes from "./routes/dashboardRoutes.js"
+import dashboardRoutes from "./routes/dashboardRoutes.js";
+import paymentRoutes from "./routes/paymentRoutes.js"
 
 const app = express();
 
@@ -18,7 +19,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/dashboard", dashboardRoutes);
-
+app.use("/api/payment", paymentRoutes);
 app.use("/api/bills", billRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api", emailRoutes);

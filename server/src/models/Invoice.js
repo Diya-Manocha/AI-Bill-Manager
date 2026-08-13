@@ -39,7 +39,6 @@ const billSchema = new mongoose.Schema(
 
     invoiceDate: {
       type: Date,
-      required: true,
       default: Date.now,
     },
 
@@ -77,14 +76,34 @@ const billSchema = new mongoose.Schema(
     },
 
     paymentTokenExpiresAt: {
-      type: Data,
+      type: Date,
+    },
+
+    paymentClaimedAt: {
+      type: Date,
+    },
+
+    paidAt: {
+      type: Date,
     },
 
     image: {
       type: String,
       trim: true,
     },
+    razorpayOrderId: {
+      type: String,
+    },
+    razorPaymentId: { 
+      type: String,
+    },
+    paymentStatus: {
+      type: String,
+      enum: ["Pending", "Paid", "Failed"],
+      default: "Pending",
+    },
   },
+
   {
     timestamps: true,
   },

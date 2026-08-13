@@ -16,7 +16,40 @@ export const uploadBill = async (req, res) => {
     // });
     // const text = await extractText(result.secure_url);
     const text = await extractText(req.file.path);
+
+console.log("========== OCR TEXT ==========");
+console.log(text);
+console.log("==============================");
     const billData = await processBill(text);
+
+    console.log("========== AI BILL DATA ==========");
+    console.log(billData);
+    console.log("==================================");
+
+    if (!billData.invoiceDate) {
+  billData.invoiceDate = new Date();
+}
+
+    const requiredFields = [
+  "companyName",
+  "customerName",
+  "customerEmail",
+  "invoiceNumber",
+  "amount",
+];
+
+for (const field of requiredFields) {
+  if (
+    billData[field] === undefined ||
+    billData[field] === null ||
+    billData[field] === ""
+  ) {
+    return res.status(400).json({
+      success: false,
+      message: `AI could not extract ${field} from invoice`,
+    });
+  }
+}
 
     const bill = new Bill({
       ...billData,
@@ -35,6 +68,7 @@ export const uploadBill = async (req, res) => {
         invoiceNumber: bill.invoiceNumber,
         amount: bill.amount,
         dueDate: bill.dueDate,
+        paymentToken: bill.paymentToken,
       });
 
       console.log("Invoice email sent successfully");

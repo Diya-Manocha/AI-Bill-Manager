@@ -11,6 +11,7 @@ import DashboardLayout from "./pages/Dasboard";
 import Register from "./pages/Register";
 import ProtectedRoute from "./components/ProtectedRoutes";
 import PublicRoute from "./components/PublicRoutes";
+import PaymentStatus from "./pages/PaymentStatus"
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<DashboardLayout />} />
           <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="/payment-status/:token" element={<PaymentStatus />} />
         </Route>
       </Routes>
     </Router>

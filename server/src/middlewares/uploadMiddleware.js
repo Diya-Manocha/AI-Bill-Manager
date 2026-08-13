@@ -4,30 +4,31 @@ const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "uploads/");
   },
+
   filename: (req, file, cb) => {
     const uniqueName = Date.now() + "-" + file.originalname;
     cb(null, uniqueName);
   },
 });
 
-const fileFilter = (req, file, cb) => {
-  const allowedTypes = [
-    "image/png",
-    "image/jpeg",
-    "image/jpg",
-    "application/pdf",
-  ];
+const allowedTypes = [
+  "image/png",
+  "image/jpeg",
+  "image/jpg",
+  "image/webp",
+];
 
+const fileFilter = (req, file, cb) => {
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error("File type not supported"), false);
+    cb(new Error("Only image files are allowed"), false);
   }
 };
 
 const upload = multer({
   storage,
-  fileFilter
+  fileFilter,
 });
 
 export default upload;
