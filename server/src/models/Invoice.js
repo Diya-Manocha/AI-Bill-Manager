@@ -34,7 +34,6 @@ const billSchema = new mongoose.Schema(
     invoiceNumber: {
       type: String,
       required: true,
-      unique: true,
       trim: true,
     },
 
@@ -71,6 +70,16 @@ const billSchema = new mongoose.Schema(
       default: "Pending",
     },
 
+    paymentToken: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+
+    paymentTokenExpiresAt: {
+      type: Data,
+    },
+
     image: {
       type: String,
       trim: true,
@@ -80,7 +89,7 @@ const billSchema = new mongoose.Schema(
     timestamps: true,
   },
 );
-
+billSchema.index({ user: 1, invoiceNumber: 1 }, { unique: true });
 const Bill = mongoose.model("Bill", billSchema);
 
 export default Bill;

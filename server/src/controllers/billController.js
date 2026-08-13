@@ -4,10 +4,13 @@ import { extractText } from "../services/orcService.js";
 import { processBill } from "../services/aiService.js";
 import Bill from "../models/Invoice.js";
 import { setFlagsFromString } from "v8";
+import { sendInvoiceEmail } from "../services/emailService.js";
+import crypto from "crypto";
 
 export const uploadBill = async (req, res) => {
   try {
     console.log(req.file);
+    const paymentToken = crypto.randomBytes(32).toString("hex");
     // const result = await cloudinary.uploader.upload(req.file.path, {
     //   folder: "bill-manager",
     // });
@@ -19,15 +22,31 @@ export const uploadBill = async (req, res) => {
       ...billData,
       user: req.user.id,
       // image: result.secure_url,
+      paymentToken,
+      paymentTokenExpiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       image: req.file.path,
     });
     await bill.save();
+
+    try {
+      await sendInvoiceEmail({
+        to: bill.customerEmail,
+        customerName: bill.customerName,
+        invoiceNumber: bill.invoiceNumber,
+        amount: bill.amount,
+        dueDate: bill.dueDate,
+      });
+
+      console.log("Invoice email sent successfully");
+    } catch (emailError) {
+      console.error("Email failed:", emailError.message);
+    }
     fs.unlinkSync(req.file.path);
     res.json({
       success: true,
       // image: result.secure_url,
       bill,
-      message: "File recei  ved",
+      message: "Invoice processed successfully",
     });
   } catch (error) {
     console.error("Message:", error.message);
@@ -43,7 +62,9 @@ export const uploadBill = async (req, res) => {
 
 export const getBills = async (req, res) => {
   try {
-    const bills = await Bill.find().sort({ createdAt: -1 });
+    const bills = await Bill.find({
+      user: req.user.id,
+    }).sort({ createdAt: -1 });
     res.status(200).json({
       success: true,
       bills,
@@ -59,7 +80,10 @@ export const getBills = async (req, res) => {
 export const getBillById = async (req, res) => {
   try {
     const { id } = req.params;
-    const bill = await Bill.findById(id);
+    const bill = await Bill.findOne({
+      _id: id,
+      user: req.user.id,
+    });
     if (!bill) {
       return res.status(404).json({
         success: false,
@@ -81,7 +105,10 @@ export const getBillById = async (req, res) => {
 export const deleteBill = async (req, res) => {
   try {
     const { id } = req.params;
-    const bill = await Bill.findById(id);
+    const bill = await Bill.findOne({
+      _id: id,
+      user: req.user.id,
+    });
     if (!bill) {
       return res.status(404).json({
         success: false,
@@ -100,22 +127,25 @@ export const deleteBill = async (req, res) => {
 export const updateBill = async (req, res) => {
   try {
     const { id } = req.params;
-   const bill = await Bill.findById(id)
-    if(!bill){
+    const bill = await Bill.findOne({
+      _id: id,
+      user: req.user.id,
+    });
+    if (!bill) {
       return res.status(404).json({
         success: false,
-        message: "Bill not found"
-      })
+        message: "Bill not found",
+      });
     }
 
-    Object.assign(Bill, req.body)
+    Object.assign(bill, req.body);
 
-    await bill.save()
+    await bill.save();
 
     res.status(200).json({
       success: true,
       message: "Bill updated successfully",
-      bill
-    })
+      bill,
+    });
   } catch (error) {}
 };
