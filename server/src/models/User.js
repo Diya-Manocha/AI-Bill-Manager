@@ -30,8 +30,38 @@ const userSchema = new mongoose.Schema(
   {
     timestamps: true,
   },
+  {
+    subscription: {
+      plan: {
+        type: String,
+        enum: ["free", "basic", "pro", "business"],
+        default: "free",
+      },
+      status: {
+        type: String,
+        enum: ["active", "cancelled", "expired", "pending"],
+        default: "pending",
+      },
+      razorpaySubscriptionId: {
+        type: String,
+        default: null,
+      },
+      currentPeriodStart: {
+        type: Date,
+        default: Date.now(),
+      },
+      currentPeriodEnd: {
+        type: Date,
+      },
+
+      billUsed: {
+        type: Number,
+        default: 0,
+      },
+    },
+  },
 );
 
-const User = mongoose.model("User", userSchema)
+const User = mongoose.model("User", userSchema);
 
 export default User;

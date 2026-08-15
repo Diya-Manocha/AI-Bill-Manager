@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   UploadCloud, 
@@ -66,9 +67,9 @@ const Sidebar = ({ activeTab = 'dashboard', setActiveTab = () => {} }) => {
               <Sparkles size={16} color="#FFD700" />
             </div>
             <p className="text-xs text-white/80 mb-4 leading-relaxed">Unlock advanced analytics and priority support.</p>
-            <button className="bg-white text-[#291899] py-2 px-4 rounded-full text-[13px] font-semibold w-full hover:-translate-y-0.5 transition-transform">
+            <Link to="/subscription" className="bg-white text-[#291899] py-2 px-4 rounded-full text-[13px] font-semibold w-full block text-center hover:-translate-y-0.5 transition-transform">
               Upgrade Now &rarr;
-            </button>
+            </Link>
           </div>
         </div>
 

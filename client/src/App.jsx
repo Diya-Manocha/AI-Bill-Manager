@@ -12,22 +12,28 @@ import Register from "./pages/Register";
 import ProtectedRoute from "./components/ProtectedRoutes";
 import PublicRoute from "./components/PublicRoutes";
 import PaymentStatus from "./pages/PaymentStatus"
+import Subscription from "./pages/Subscription";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route element={<PublicRoute />}>
+    <>
+      <Toaster position="top-right" />
+      <Router>
+        <Routes>
+          <Route element={<PublicRoute />}>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
         </Route>
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<DashboardLayout />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="/subscription" element={<Subscription />} />
           <Route path="/payment-status/:token" element={<PaymentStatus />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
     </Router>
+    </>
   );
 }
 

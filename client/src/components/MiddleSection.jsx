@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
 import { UploadCloud, Sparkles } from "lucide-react";
+import toast from "react-hot-toast";
 import {
   AreaChart,
   Area,
@@ -31,7 +32,7 @@ const MiddleSection = ({ bills }) => {
     const allowedTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
 
     if (!allowedTypes.includes(file.type)) {
-      alert("Only image files are allowed (PNG, JPG, JPEG, WEBP)");
+      toast.error("Only image files are allowed (PNG, JPG, JPEG, WEBP)");
       e.target.value = "";
       return;
     }
@@ -44,10 +45,10 @@ const MiddleSection = ({ bills }) => {
 
       await uploadBill(formData);
 
-      alert("Invoice uploaded successfully!");
+      toast.success("Invoice uploaded successfully!");
     } catch (error) {
       console.error("Upload failed:", error);
-      alert("Failed to upload invoice");
+      toast.error("Failed to upload invoice");
     } finally {
       setUploading(false);
 
