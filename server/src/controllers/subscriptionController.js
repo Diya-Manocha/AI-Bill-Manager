@@ -113,9 +113,10 @@ export const verifySubscriptionPayment = async (req, res) => {
     }
     user.subscription = {
       plan: planId,
+      status: "active",
       billUsed: 0,
-      startDate: new Date(),
-      endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      currentPeriodStart: new Date(),
+      currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
     };
 
     await user.save();

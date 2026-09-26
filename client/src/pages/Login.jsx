@@ -3,6 +3,7 @@ import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthLayout from "../components/AuthLayout";
 import { login } from "../apis/authApi";
+import toast from "react-hot-toast";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -18,11 +19,13 @@ export default function Login() {
         password,
       });
       if (response.success) {
-        localStorage.setItem("token", response.data.token);
+        toast.success("Logged in successfully");
+        localStorage.setItem("token", response.token);
         navigate("/");
       }
     } catch (error) {
       console.log(error);
+      toast.error(error.response?.data?.message || "Login failed");
     }
   };
 

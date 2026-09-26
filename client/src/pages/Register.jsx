@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import AuthLayout from "../components/AuthLayout";
 import { register } from "../apis/authApi";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
@@ -25,11 +26,12 @@ export default function Register() {
       console.log("Register response:", response);
 
       if (response.success) {
-        localStorage.setItem("token", response.data.token);
-        navigate("/");
+        toast.success("Account created successfully. Please login.");
+        navigate("/login");
       }
     } catch (error) {
       console.log("Registration failed:", error);
+      toast.error(error.response?.data?.message || "Registration failed");
     }
   };
 

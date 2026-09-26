@@ -2,7 +2,7 @@ export const PLANS = {
   free: {
     name: "Free",
     price: 0,
-    billLimit: 5,
+    billLimit: 10,
     duration: "monthly",
   },
 

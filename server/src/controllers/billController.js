@@ -1,5 +1,4 @@
 import cloudinary from "../config/cloudinary.js";
-import fs from "fs";
 import { extractText } from "../services/orcService.js";
 import { processBill } from "../services/aiService.js";
 import Bill from "../models/Invoice.js";
@@ -10,31 +9,51 @@ import User from "../models/User.js";
 
 export const uploadBill = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id)
-   const plan = PLANS[user.subscription.plan];
+    const user = await User.findById(req.user.id);
 
- if (!user) {
-  return res.status(404).json({
-    success: false,
-    message: "User not found",
-  });
-}
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
 
-if (!plan) {
-  return res.status(400).json({
-    success: false,
-    message: "Invalid subscription plan",
-  });
-}
+    // Existing users may not have this field in MongoDB yet.
+    if (!user.subscription) {
+      user.subscription = {
+        plan: "free",
+        status: "active",
+        billUsed: 0,
+      };
+      await user.save();
+    }
 
-if (user.subscription.billUsed >= plan.billLimit) {
-  return res.status(403).json({
-    success: false,
-    message: `You have reached your ${plan.name} plan limit of ${plan.billLimit} bills.`,
-    limit: plan.billLimit,
-    used: user.subscription.billUsed,
-  });
-}
+    const plan = PLANS[user.subscription.plan];
+
+    if (!plan) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid subscription plan",
+      });
+    }
+
+    if (user.subscription.billUsed >= plan.billLimit) {
+      return res.status(403).json({
+        success: false,
+        message: `You have reached your ${plan.name} plan limit of ${plan.billLimit} bills.`,
+        limit: plan.billLimit,
+        used: user.subscription.billUsed,
+        upgradeRequired: true,
+        code: "BILL_LIMIT_REACHED",
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Invoice image is required",
+      });
+    }
     console.log(req.file);
     const paymentToken = crypto.randomBytes(32).toString("hex");
     // const result = await cloudinary.uploader.upload(req.file.path, {
@@ -95,7 +114,8 @@ await user.save();
     } catch (emailError) {
       console.error("Email failed:", emailError.message);
     }
-    fs.unlinkSync(req.file.path);
+    // Keep the uploaded file so it can be previewed from the dashboard.
+    // It is served by app.js at /uploads.
     res.json({
       success: true,
       // image: result.secure_url,

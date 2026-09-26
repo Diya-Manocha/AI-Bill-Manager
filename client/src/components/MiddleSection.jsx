@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react";
 import { UploadCloud, Sparkles } from "lucide-react";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 import {
   AreaChart,
   Area,
@@ -22,6 +23,7 @@ const data = [
 
 const MiddleSection = ({ bills }) => {
   const fileInputRef = useRef(null);
+  const navigate = useNavigate();
   const [uploading, setUploading] = useState(false);
 
   const handleFileChange = async (e) => {
@@ -48,7 +50,12 @@ const MiddleSection = ({ bills }) => {
       toast.success("Invoice uploaded successfully!");
     } catch (error) {
       console.error("Upload failed:", error);
-      toast.error("Failed to upload invoice");
+      if (error.response?.status === 403 && error.response?.data?.upgradeRequired) {
+        toast.error("You have used all 10 free uploads. Please buy a subscription.");
+        navigate("/subscription");
+      } else {
+        toast.error(error.response?.data?.message || "Failed to upload invoice");
+      }
     } finally {
       setUploading(false);
 

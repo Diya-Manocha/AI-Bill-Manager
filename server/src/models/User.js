@@ -26,11 +26,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-  },
-  {
-    timestamps: true,
-  },
-  {
     subscription: {
       plan: {
         type: String,
@@ -59,6 +54,9 @@ const userSchema = new mongoose.Schema(
         default: 0,
       },
     },
+  },
+  {
+    timestamps: true,
   },
 );
 

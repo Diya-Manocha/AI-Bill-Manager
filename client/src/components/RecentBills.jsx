@@ -1,5 +1,5 @@
-import React from 'react';
-import { Filter, FileText, Eye, Download, ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
+import React, { useState } from 'react';
+import { Filter, FileText, Eye, Download, ChevronLeft, ChevronRight, X } from 'lucide-react';
 
 const StatusBadge = ({ status }) => {
   const getStatusClass = () => {
@@ -29,8 +29,31 @@ const getVendorColor = (index) => {
 };
 
 const RecentBills = ({ bills = [], loading }) => {
+  const [selectedBill, setSelectedBill] = useState(null);
+
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount || 0);
+  };
+
+  const getBillImageUrl = (imagePath) => {
+    if (!imagePath) {
+      console.warn('[Bill Preview] No image path found on bill');
+      return null;
+    }
+    if (/^https?:\/\//i.test(imagePath)) {
+      return imagePath;
+    }
+    const normalizedPath = imagePath.replace(/\\/g, '/');
+    const uploadsIndex = normalizedPath.indexOf('uploads/');
+    const publicPath = uploadsIndex >= 0
+      ? normalizedPath.slice(uploadsIndex)
+      : `uploads/${normalizedPath.replace(/^\/+/, '')}`;
+    const encodedPath = publicPath
+      .split('/')
+      .map((segment) => encodeURIComponent(segment))
+      .join('/');
+    const imageUrl = `http://localhost:5000/${encodedPath}`;
+    return imageUrl;
   };
 
   return (
@@ -96,7 +119,15 @@ const RecentBills = ({ bills = [], loading }) => {
                 <td className="py-4 px-4 border-b border-border"><StatusBadge status={bill.status || 'Pending'} /></td>
                 <td className="py-4 px-4 border-b border-border">
                   <div className="flex items-center gap-2">
-                    <button className="w-8 h-8 rounded-lg border border-border flex items-center justify-center text-text-muted transition-colors hover:bg-bg hover:text-text-main"><Eye size={16} /></button>
+                    <button
+                      type="button"
+                      title="View bill"
+                      aria-label={`View invoice ${bill.invoiceNumber || ''}`}
+                      onClick={() => setSelectedBill(bill)}
+                      className="w-8 h-8 rounded-lg border border-border flex items-center justify-center text-text-muted transition-colors hover:bg-bg hover:text-text-main"
+                    >
+                      <Eye size={16} />
+                    </button>
                     <button className="w-8 h-8 rounded-lg border border-border flex items-center justify-center text-text-muted transition-colors hover:bg-bg hover:text-text-main"><Download size={16} /></button>
                   </div>
                 </td>
@@ -114,6 +145,52 @@ const RecentBills = ({ bills = [], loading }) => {
             <button className="min-w-8 h-8 rounded-lg flex items-center justify-center text-[13px] text-text-main transition-colors hover:bg-bg"><ChevronLeft size={16}/></button>
             <button className="min-w-8 h-8 rounded-lg flex items-center justify-center text-[13px] text-white bg-primary">1</button>
             <button className="min-w-8 h-8 rounded-lg flex items-center justify-center text-[13px] text-text-main transition-colors hover:bg-bg"><ChevronRight size={16}/></button>
+          </div>
+        </div>
+      )}
+
+      {selectedBill && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Bill preview"
+          onClick={() => setSelectedBill(null)}
+        >
+          <div
+            className="relative flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-border px-5 py-4">
+              <div>
+                <h3 className="font-semibold text-text-main">{selectedBill.invoiceNumber || 'Bill preview'}</h3>
+                <p className="text-xs text-text-muted">{selectedBill.companyName || 'Invoice'}</p>
+              </div>
+              <button
+                type="button"
+                title="Close preview"
+                aria-label="Close bill preview"
+                onClick={() => setSelectedBill(null)}
+                className="rounded-lg p-2 text-text-muted transition-colors hover:bg-bg hover:text-text-main"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-auto bg-bg p-4">
+              {getBillImageUrl(selectedBill.image) ? (
+                <img
+                  src={getBillImageUrl(selectedBill.image)}
+                  alt={`Invoice ${selectedBill.invoiceNumber || ''}`}
+                  onError={(event) => {
+                    console.error('[Bill Preview] Image failed to load:', event.currentTarget.src);
+                  }}
+                  className="mx-auto h-auto max-h-[70vh] max-w-full rounded-lg object-contain shadow-sm"
+                />
+              ) : (
+                <p className="py-16 text-center text-text-muted">No bill image is available.</p>
+              )}
+            </div>
           </div>
         </div>
       )}
